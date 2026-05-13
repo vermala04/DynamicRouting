@@ -19,6 +19,8 @@ import data_generator
 import optimizer
 import analytics as analytics_mod
 import carbon as carbon_mod
+import architecture as architecture_mod
+from config import settings
 from distance import build_matrices
 from llm import stream_chat
 from models import DisruptionPayload, ChatRequest
@@ -26,10 +28,10 @@ from models import DisruptionPayload, ChatRequest
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("ceva.api")
 
-app = FastAPI(title="CEVA Dynamic Routing POC", version="1.0.0")
+app = FastAPI(title=settings.app_name, version=settings.app_version)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,7 +64,7 @@ def _startup() -> None:
     STATE.orders = list(data["orders"])
     STATE.original_orders = copy.deepcopy(data["orders"])
     STATE.original_vehicles = copy.deepcopy(data["vehicles"])
-    STATE.use_osrm = os.getenv("USE_OSRM", "1") not in ("0", "false", "False")
+    STATE.use_osrm = settings.use_osrm
     _rebuild_matrices()
     log.info("Loaded %d orders, %d vehicles. OSRM=%s", len(STATE.orders), len(STATE.vehicles), STATE.use_osrm)
 
@@ -118,9 +120,9 @@ def _run_optimized() -> Dict[str, Any]:
 # ---------- Endpoints ----------
 @app.get("/")
 def root():
-    return {"service": "CEVA Dynamic Routing POC", "status": "ok", "endpoints": [
+    return {"service": settings.app_name, "status": "ok", "region": settings.operating_region, "endpoints": [
         "/api/data", "/api/baseline", "/api/optimize", "/api/disrupt",
-        "/api/analytics", "/api/carbon", "/api/utilization", "/api/chat", "/api/reset"
+        "/api/analytics", "/api/carbon", "/api/utilization", "/api/architecture", "/api/chat", "/api/reset"
     ]}
 
 
@@ -131,6 +133,8 @@ def get_data():
         "vehicles": STATE.vehicles,
         "orders": STATE.orders,
         "carbon_factors": carbon_mod.EMISSION_FACTORS_G_PER_KM,
+        "region": settings.operating_region,
+        "control_tower": settings.control_tower,
     }
 
 
@@ -148,15 +152,15 @@ def post_optimize():
 def post_disrupt(d: DisruptionPayload):
     """Inject a disruption and re-optimize."""
     if d.type == "new_order":
-        # New urgent order in Noida by default
+        # New urgent order in Paris by default
         payload = d.payload or {}
         new_id = payload.get("order_id") or f"ORD-{2000 + len(STATE.orders)}"
         new_order = {
             "order_id": new_id,
-            "customer_name": payload.get("customer_name", "Aditya Reddy"),
-            "address": payload.get("address", "Plot 99, Noida Sec 62, 201309"),
-            "lat": payload.get("lat", 28.6271 + random.uniform(-0.01, 0.01)),
-            "lon": payload.get("lon", 77.3716 + random.uniform(-0.01, 0.01)),
+            "customer_name": payload.get("customer_name", "Camille Martin"),
+            "address": payload.get("address", "42 Rue de la Logistique, Paris 12e - Bercy 75012, France"),
+            "lat": payload.get("lat", 48.8386 + random.uniform(-0.01, 0.01)),
+            "lon": payload.get("lon", 2.3822 + random.uniform(-0.01, 0.01)),
             "weight_kg": payload.get("weight_kg", 35.0),
             "time_window_start": payload.get("time_window_start", 12 * 60),
             "time_window_end": payload.get("time_window_end", 14 * 60),
@@ -184,15 +188,15 @@ def post_disrupt(d: DisruptionPayload):
         return {"disruption": "vehicle_breakdown", "removed_vehicle_id": vid, "result": result}
 
     if d.type == "traffic_block":
-        # Simulate NH-48 corridor block: add 80% travel-time penalty between any
-        # pair where one node is in the Gurugram cluster (lat<28.55 & lon<77.15)
+        # Simulate A1/A86 corridor congestion: add 80% travel-time penalty between any
+        # pair where one node is in the north Paris / CDG corridor
         payload = d.payload or {}
         factor = float(payload.get("factor", 1.8))
         coords: List[Tuple[float, float]] = [(STATE.depot["lat"], STATE.depot["lon"])]
         coords.extend((o["lat"], o["lon"]) for o in STATE.orders)
 
         def in_corridor(c):
-            return c[0] < 28.55 and c[1] < 77.15
+            return c[0] > 48.90 and 2.25 < c[1] < 2.60
 
         for i in range(len(coords)):
             for j in range(len(coords)):
@@ -202,7 +206,7 @@ def post_disrupt(d: DisruptionPayload):
                     STATE.time_min[i][j] *= factor
                     STATE.distance_km[i][j] *= 1.15  # detour adds km too
         result = _run_optimized()
-        return {"disruption": "traffic_block", "corridor": "NH-48 / Gurugram", "factor": factor, "result": result}
+        return {"disruption": "traffic_block", "corridor": "A1 / A86 north Paris", "factor": factor, "result": result}
 
     raise HTTPException(400, f"Unknown disruption type: {d.type}")
 
@@ -227,6 +231,12 @@ def get_utilization():
     if STATE.last_optimized is None:
         _run_optimized()
     return analytics_mod.utilization_breakdown(STATE.last_optimized["routes"])
+
+
+@app.get("/api/architecture")
+def get_architecture():
+    """Return Phase 1 findings, target architecture, and AI governance boundaries."""
+    return architecture_mod.platform_assessment()
 
 
 @app.post("/api/chat")

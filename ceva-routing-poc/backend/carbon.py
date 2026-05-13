@@ -1,23 +1,27 @@
-"""Carbon accounting constants & helpers for CEVA POC.
+"""Carbon accounting constants & helpers for the CEVA France POC.
 
-Emission factors are well-to-wheel approximations for India 2025.
+Emission factors are operational planning assumptions for a French last-mile fleet.
+They should be calibrated with CEVA telematics and carrier sustainability data before
+production use.
 """
 from __future__ import annotations
+import os
 from typing import Dict
 
 # grams CO2e per km
 EMISSION_FACTORS_G_PER_KM: Dict[str, int] = {
-    "small_van": 250,       # diesel LCV
-    "medium_truck": 320,    # diesel MCV
-    "ev": 75,               # India grid-mix 2025
+    "small_van": 210,       # diesel LCV, France urban duty cycle
+    "medium_truck": 520,    # diesel MCV / rigid truck
+    "ev": 20,               # France low-carbon grid planning factor
 }
 
-# Carbon shadow price for multi-objective optimization (₹ per tonne)
-CARBON_PRICE_INR_PER_TONNE = 2000.0
+# Carbon shadow price for multi-objective optimization (€ per tonne).
+# Keep the variable name stable to avoid changing optimizer API contracts.
+CARBON_PRICE_INR_PER_TONNE = float(os.getenv("CARBON_PRICE_EUR_PER_TONNE", "90"))
 
 # Equivalency constants
 TREE_KG_CO2_PER_YEAR = 21.0      # one mature tree absorbs ~21 kg CO2/yr
-CAR_G_CO2_PER_KM = 170.0         # avg passenger car (petrol) g CO2/km
+CAR_G_CO2_PER_KM = 120.0         # avg passenger car planning factor, France g CO2/km
 
 # Energy/fuel reference numbers (for "fuel used" reporting)
 DIESEL_KM_PER_LITRE = {"small_van": 9.0, "medium_truck": 5.0}

@@ -16,7 +16,7 @@ const TopBar: React.FC<Props> = ({ scenario, onScenarioChange, onOptimize, onRes
           <div className="text-3xl font-extrabold tracking-tight text-ceva-red leading-none">CEVA</div>
           <div className="hidden md:flex flex-col leading-tight">
             <span className="text-sm font-bold text-ceva-black">Dynamic Routing Intelligence</span>
-            <span className="text-[11px] text-ceva-grayText">Delhi NCR last-mile control tower</span>
+            <span className="text-[11px] text-ceva-grayText">France last-mile control tower · Roissy-CDG</span>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ const TopBar: React.FC<Props> = ({ scenario, onScenarioChange, onOptimize, onRes
 
           <span className="ceva-pill bg-ceva-navy text-white">
             <span className="w-1.5 h-1.5 rounded-full bg-ceva-amber inline-block" />
-            Powered by Mistral AI
+            Mistral AI · RAG Pipeline
           </span>
         </div>
       </div>

@@ -22,6 +22,7 @@ export const api = {
   analytics: () => jsonReq<Analytics>("/analytics"),
   carbon: () => jsonReq<Carbon>("/carbon"),
   utilization: () => jsonReq<Utilization>("/utilization"),
+  architecture: () => jsonReq<any>("/architecture"),
   disrupt: (type: "new_order" | "vehicle_breakdown" | "traffic_block", payload?: any) =>
     jsonReq<{ disruption: string; result: ScenarioResult; [k: string]: any }>("/disrupt", {
       method: "POST",

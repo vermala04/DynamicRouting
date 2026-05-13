@@ -48,7 +48,7 @@ const FinancialTab: React.FC<Props> = ({ data }) => {
           <div className="text-2xl font-extrabold text-ceva-red">
             {fmtINR(data.extrapolation.annual_savings_inr ?? 0)}
             <span className="text-sm text-ceva-grayText font-semibold ml-1">
-              (~₹{fmtNum(data.extrapolation.annual_savings_cr ?? 0, 2)} Cr)
+              (~€{fmtNum(((data.extrapolation.annual_savings_inr ?? 0) / 1_000_000), 2)}M)
             </span>
           </div>
           <div className="font-bold text-ceva-green">
@@ -64,9 +64,9 @@ const FinancialTab: React.FC<Props> = ({ data }) => {
             <BarChart data={compare}>
               <CartesianGrid strokeDasharray="3 3" stroke={CEVA.grayMid} />
               <XAxis dataKey="name" tick={{ fontSize: 12, fill: CEVA.black }} />
-              <YAxis tick={{ fontSize: 11, fill: CEVA.grayText }} tickFormatter={(v) => `₹${v}`} />
+              <YAxis tick={{ fontSize: 11, fill: CEVA.grayText }} tickFormatter={(v) => `€${v}`} />
               <Tooltip formatter={(v: number) => fmtINR(v)} />
-              <Bar dataKey="value" name="₹ / delivery">
+              <Bar dataKey="value" name="€ / delivery">
                 {compare.map((d, i) => (
                   <Cell key={i} fill={i === 0 ? CEVA.red : CEVA.green} />
                 ))}
@@ -80,8 +80,8 @@ const FinancialTab: React.FC<Props> = ({ data }) => {
         <div className="text-sm font-bold text-ceva-black mb-2">Notes</div>
         <ul className="text-xs text-ceva-grayText space-y-1.5 list-disc pl-4">
           <li>Working days assumed: 26/month, 312/year.</li>
-          <li>Extrapolation assumes uniform performance across 10 NCR-class depots.</li>
-          <li>Carbon shadow price: ₹2,000/tonne (already priced into optimization cost).</li>
+          <li>Extrapolation assumes uniform performance across 10 France regional depots.</li>
+          <li>Carbon shadow price: €90/tonne (already priced into optimization cost).</li>
         </ul>
       </div>
     </div>

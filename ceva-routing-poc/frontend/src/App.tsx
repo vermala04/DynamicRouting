@@ -1,24 +1,28 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import TopBar from "./components/TopBar";
 import KpiStrip from "./components/KpiStrip";
 import MapView from "./components/MapView";
 import DisruptionPanel from "./components/DisruptionPanel";
-import UtilizationTab from "./components/UtilizationTab";
-import CarbonTab from "./components/CarbonTab";
-import FinancialTab from "./components/FinancialTab";
-import ServiceTab from "./components/ServiceTab";
 import CoPilotChat from "./components/CoPilotChat";
-import RouteDrawer from "./components/RouteDrawer";
+import OptimizationReasoningPanel from "./components/OptimizationReasoningPanel";
 import { api } from "./api";
 import type { Depot, ScenarioResult } from "./types";
 
-type TabKey = "utilization" | "carbon" | "financial" | "service";
+const UtilizationTab = lazy(() => import("./components/UtilizationTab"));
+const CarbonTab = lazy(() => import("./components/CarbonTab"));
+const FinancialTab = lazy(() => import("./components/FinancialTab"));
+const ServiceTab = lazy(() => import("./components/ServiceTab"));
+const ArchitectureTab = lazy(() => import("./components/ArchitectureTab"));
+const RouteDrawer = lazy(() => import("./components/RouteDrawer"));
+
+type TabKey = "utilization" | "carbon" | "financial" | "service" | "architecture";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "utilization", label: "Utilization" },
   { key: "carbon", label: "Carbon Footprint" },
   { key: "financial", label: "Financial Impact" },
   { key: "service", label: "Service Quality" },
+  { key: "architecture", label: "Architecture & AI Governance" },
 ];
 
 const App: React.FC = () => {
@@ -131,6 +135,13 @@ const App: React.FC = () => {
           baseline={baseline?.kpis ?? null}
         />
 
+        {current?.analytics?.optimization_reasoning && (
+          <OptimizationReasoningPanel
+            reasoning={current.analytics.optimization_reasoning}
+            scenario={scenario}
+          />
+        )}
+
         <DisruptionPanel onInject={inject} view={view} onViewChange={setView} loading={loading} />
 
         {depot && current && (
@@ -160,25 +171,29 @@ const App: React.FC = () => {
             </div>
           </div>
           <div className="p-4">
-            {!current?.analytics ? (
-              <div className="text-sm text-ceva-grayText">Loading analytics…</div>
-            ) : tab === "utilization" ? (
-              <UtilizationTab data={current.analytics.utilization} onSelectVehicle={setSelectedVehicleId} />
-            ) : tab === "carbon" ? (
-              <CarbonTab
-                optimized={current.analytics.carbon}
-                baseline={baseline?.analytics?.carbon}
-              />
-            ) : tab === "financial" ? (
-              <FinancialTab data={current.analytics.financial} />
-            ) : (
-              <ServiceTab data={current.analytics.service} />
-            )}
+            <Suspense fallback={<div className="text-sm text-ceva-grayText">Loading panel…</div>}>
+              {!current?.analytics ? (
+                <div className="text-sm text-ceva-grayText">Loading analytics…</div>
+              ) : tab === "utilization" ? (
+                <UtilizationTab data={current.analytics.utilization} onSelectVehicle={setSelectedVehicleId} />
+              ) : tab === "architecture" ? (
+                <ArchitectureTab />
+              ) : tab === "carbon" ? (
+                <CarbonTab
+                  optimized={current.analytics.carbon}
+                  baseline={baseline?.analytics?.carbon}
+                />
+              ) : tab === "financial" ? (
+                <FinancialTab data={current.analytics.financial} />
+              ) : (
+                <ServiceTab data={current.analytics.service} />
+              )}
+            </Suspense>
           </div>
         </div>
 
         <footer className="text-center text-[11px] text-ceva-grayText py-6">
-          CEVA Logistics POC | Confidential | © 2026
+          CEVA Logistics France Control Tower POC | Confidential | © 2026
         </footer>
       </main>
 
@@ -194,9 +209,11 @@ const App: React.FC = () => {
 
       <CoPilotChat open={chatOpen} onClose={() => setChatOpen(false)} scenario={scenario} />
 
-      {selectedRoute && (
-        <RouteDrawer route={selectedRoute} onClose={() => setSelectedVehicleId(null)} />
-      )}
+      <Suspense fallback={null}>
+        {selectedRoute && (
+          <RouteDrawer route={selectedRoute} onClose={() => setSelectedVehicleId(null)} />
+        )}
+      </Suspense>
     </div>
   );
 };

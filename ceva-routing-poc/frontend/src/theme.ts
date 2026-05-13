@@ -25,10 +25,10 @@ export const ROUTE_COLORS = [
 ];
 
 export const fmtINR = (n: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n || 0);
+  new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
 
 export const fmtNum = (n: number, d = 1) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: d }).format(n || 0);
+  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: d }).format(n || 0);
 
 export const minutesToHHMM = (mins: number) => {
   const h = Math.floor(mins / 60);

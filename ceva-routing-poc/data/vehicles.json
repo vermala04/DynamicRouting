@@ -7,10 +7,10 @@
     "max_stops": 12,
     "shift_start": 480,
     "shift_end": 1080,
-    "driver_name": "Rakesh Yadav",
-    "base_cost_per_km": 14.0,
-    "co2_grams_per_km": 250,
-    "avg_speed_kmh": 26.0
+    "driver_name": "Jean Martin",
+    "base_cost_per_km": 0.72,
+    "co2_grams_per_km": 210,
+    "avg_speed_kmh": 34.0
   },
   {
     "vehicle_id": "V-102",
@@ -20,10 +20,10 @@
     "max_stops": 12,
     "shift_start": 480,
     "shift_end": 1080,
-    "driver_name": "Suresh Kumar",
-    "base_cost_per_km": 14.0,
-    "co2_grams_per_km": 250,
-    "avg_speed_kmh": 26.0
+    "driver_name": "Sabrina Laurent",
+    "base_cost_per_km": 0.72,
+    "co2_grams_per_km": 210,
+    "avg_speed_kmh": 34.0
   },
   {
     "vehicle_id": "V-103",
@@ -33,10 +33,10 @@
     "max_stops": 12,
     "shift_start": 540,
     "shift_end": 1140,
-    "driver_name": "Mohan Lal",
-    "base_cost_per_km": 14.0,
-    "co2_grams_per_km": 250,
-    "avg_speed_kmh": 26.0
+    "driver_name": "Karim Benali",
+    "base_cost_per_km": 0.72,
+    "co2_grams_per_km": 210,
+    "avg_speed_kmh": 34.0
   },
   {
     "vehicle_id": "V-201",
@@ -46,10 +46,10 @@
     "max_stops": 18,
     "shift_start": 480,
     "shift_end": 1080,
-    "driver_name": "Devendra Singh",
-    "base_cost_per_km": 22.0,
-    "co2_grams_per_km": 320,
-    "avg_speed_kmh": 24.0
+    "driver_name": "Luc Moreau",
+    "base_cost_per_km": 1.15,
+    "co2_grams_per_km": 520,
+    "avg_speed_kmh": 32.0
   },
   {
     "vehicle_id": "V-202",
@@ -59,10 +59,10 @@
     "max_stops": 18,
     "shift_start": 480,
     "shift_end": 1080,
-    "driver_name": "Bhupinder Negi",
-    "base_cost_per_km": 22.0,
-    "co2_grams_per_km": 320,
-    "avg_speed_kmh": 24.0
+    "driver_name": "\u00c9ric Dubois",
+    "base_cost_per_km": 1.15,
+    "co2_grams_per_km": 520,
+    "avg_speed_kmh": 32.0
   },
   {
     "vehicle_id": "V-203",
@@ -72,10 +72,10 @@
     "max_stops": 18,
     "shift_start": 540,
     "shift_end": 1140,
-    "driver_name": "Vinod Pandey",
-    "base_cost_per_km": 22.0,
-    "co2_grams_per_km": 320,
-    "avg_speed_kmh": 24.0
+    "driver_name": "Nadia Robert",
+    "base_cost_per_km": 1.15,
+    "co2_grams_per_km": 520,
+    "avg_speed_kmh": 32.0
   },
   {
     "vehicle_id": "V-301",
@@ -85,10 +85,10 @@
     "max_stops": 14,
     "shift_start": 480,
     "shift_end": 1080,
-    "driver_name": "Harish Chand",
-    "base_cost_per_km": 9.0,
-    "co2_grams_per_km": 75,
-    "avg_speed_kmh": 28.0
+    "driver_name": "Hugo Petit",
+    "base_cost_per_km": 0.32,
+    "co2_grams_per_km": 20,
+    "avg_speed_kmh": 36.0
   },
   {
     "vehicle_id": "V-302",
@@ -98,9 +98,9 @@
     "max_stops": 14,
     "shift_start": 540,
     "shift_end": 1140,
-    "driver_name": "Ramesh Bisht",
-    "base_cost_per_km": 9.0,
-    "co2_grams_per_km": 75,
-    "avg_speed_kmh": 28.0
+    "driver_name": "M\u00e9lanie Fournier",
+    "base_cost_per_km": 0.32,
+    "co2_grams_per_km": 20,
+    "avg_speed_kmh": 36.0
   }
 ]

@@ -191,7 +191,7 @@ def optimize(
     def make_cost_cb(v_idx: int):
         v = vehicles[v_idx]
         per_km = v["base_cost_per_km"]
-        # carbon cost per km in INR: g/km / 1e6 * carbon_price (INR/tonne)
+        # carbon cost per km in EUR: g/km / 1e6 * carbon_price (EUR/tonne)
         carbon_per_km = (v["co2_grams_per_km"] / 1_000_000.0) * CARBON_PRICE_INR_PER_TONNE
 
         def cb(from_index, to_index):

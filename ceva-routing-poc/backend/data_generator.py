@@ -1,4 +1,4 @@
-"""Synthetic CEVA Delhi NCR last-mile dataset generator.
+"""Synthetic CEVA France last-mile dataset generator.
 
 Run: python data_generator.py [--regenerate]
 """
@@ -14,50 +14,50 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 SEED = 42
 
 DEPOT = {
-    "depot_id": "DEP-DEL-01",
-    "name": "CEVA Delhi NCR Hub",
-    "address": "CEVA Logistics Hub, Mahipalpur, New Delhi 110037",
-    "lat": 28.6139,
-    "lon": 77.2090,
+    "depot_id": "DEP-FR-RSY-01",
+    "name": "CEVA Roissy-CDG France Hub",
+    "address": "14 Rue du Meunier, 95700 Roissy-en-France, France",
+    "lat": 49.0097,
+    "lon": 2.5479,
 }
 
-# Realistic Delhi-NCR delivery clusters: (area, lat, lon, pin)
-NCR_AREAS = [
-    ("Saket",                28.5245, 77.2066, "110017"),
-    ("Dwarka Sec 12",        28.5921, 77.0460, "110078"),
-    ("Rohini Sec 7",         28.7196, 77.1186, "110085"),
-    ("Noida Sec 62",         28.6271, 77.3716, "201309"),
-    ("Noida Sec 18",         28.5708, 77.3260, "201301"),
-    ("Gurugram Cyber City",  28.4949, 77.0890, "122002"),
-    ("Gurugram Sec 56",      28.4231, 77.1027, "122011"),
-    ("Karol Bagh",           28.6519, 77.1909, "110005"),
-    ("Lajpat Nagar",         28.5670, 77.2436, "110024"),
-    ("Faridabad Sec 21",     28.4089, 77.3178, "121001"),
-    ("Ghaziabad Vasundhara", 28.6644, 77.3729, "201012"),
-    ("Vasant Kunj",          28.5200, 77.1588, "110070"),
-    ("Mayur Vihar",          28.6086, 77.2949, "110091"),
-    ("Pitampura",            28.7041, 77.1325, "110034"),
-    ("Janakpuri",            28.6219, 77.0878, "110058"),
-    ("Greater Kailash",      28.5494, 77.2425, "110048"),
-    ("Connaught Place",      28.6315, 77.2167, "110001"),
-    ("Mehrauli",             28.5239, 77.1855, "110030"),
+# Realistic France / Île-de-France delivery clusters: (area, lat, lon, postcode)
+FRANCE_AREAS = [
+    ("Paris 8e - Champs-Élysées", 48.8698, 2.3078, "75008"),
+    ("Paris 12e - Bercy", 48.8386, 2.3822, "75012"),
+    ("Paris 15e - Vaugirard", 48.8412, 2.3003, "75015"),
+    ("La Défense", 48.8924, 2.2369, "92400"),
+    ("Boulogne-Billancourt", 48.8397, 2.2399, "92100"),
+    ("Saint-Denis", 48.9362, 2.3574, "93200"),
+    ("Aubervilliers", 48.9146, 2.3822, "93300"),
+    ("Bobigny", 48.9086, 2.4397, "93000"),
+    ("Créteil", 48.7904, 2.4556, "94000"),
+    ("Rungis MIN", 48.7537, 2.3500, "94150"),
+    ("Massy", 48.7309, 2.2713, "91300"),
+    ("Versailles", 48.8014, 2.1301, "78000"),
+    ("Cergy", 49.0361, 2.0631, "95000"),
+    ("Argenteuil", 48.9472, 2.2467, "95100"),
+    ("Marne-la-Vallée", 48.8591, 2.5987, "77700"),
+    ("Meaux", 48.9603, 2.8883, "77100"),
+    ("Melun", 48.5393, 2.6607, "77000"),
+    ("Compiègne", 49.4179, 2.8261, "60200"),
 ]
 
-INDIAN_FIRST_NAMES = [
-    "Rahul", "Priya", "Amit", "Sneha", "Vikram", "Anjali", "Rohan", "Pooja",
-    "Arjun", "Neha", "Karan", "Divya", "Sanjay", "Kavita", "Manish", "Ritu",
-    "Suresh", "Meera", "Deepak", "Anita", "Nikhil", "Shreya", "Ravi", "Tanvi",
-    "Aditya", "Isha", "Vivek", "Riya", "Ankit", "Pallavi",
+FRENCH_FIRST_NAMES = [
+    "Camille", "Julien", "Sophie", "Nicolas", "Claire", "Thomas", "Élodie", "Antoine",
+    "Léa", "Maxime", "Manon", "Hugo", "Chloé", "Lucas", "Inès", "Mathieu",
+    "Sarah", "Romain", "Amandine", "Mehdi", "Nadia", "Yanis", "Océane", "Baptiste",
+    "Karim", "Anaïs", "Louis", "Mélanie", "Arthur", "Fatima",
 ]
-INDIAN_LAST_NAMES = [
-    "Sharma", "Patel", "Singh", "Verma", "Gupta", "Kumar", "Rao", "Iyer",
-    "Reddy", "Nair", "Joshi", "Mehta", "Khanna", "Kapoor", "Malhotra",
-    "Chopra", "Bansal", "Agarwal", "Saxena", "Mishra",
+FRENCH_LAST_NAMES = [
+    "Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand",
+    "Leroy", "Moreau", "Simon", "Laurent", "Lefebvre", "Michel", "Garcia",
+    "David", "Bertrand", "Roux", "Vincent", "Fournier",
 ]
 
 DRIVER_NAMES = [
-    "Rakesh Yadav", "Suresh Kumar", "Mohan Lal", "Devendra Singh",
-    "Bhupinder Negi", "Vinod Pandey", "Harish Chand", "Ramesh Bisht",
+    "Jean Martin", "Sabrina Laurent", "Karim Benali", "Luc Moreau",
+    "Éric Dubois", "Nadia Robert", "Hugo Petit", "Mélanie Fournier",
 ]
 
 
@@ -74,38 +74,38 @@ def build_vehicles() -> List[Dict[str, Any]]:
         # 3 small vans (diesel)
         {"vehicle_id": "V-101", "type": "small_van", "fuel_type": "diesel",
          "capacity_kg": 500, "max_stops": 12, "shift_start": 8 * 60, "shift_end": 18 * 60,
-         "driver_name": "Rakesh Yadav", "base_cost_per_km": 14.0,
-         "co2_grams_per_km": 250, "avg_speed_kmh": 26.0},
+         "driver_name": "Jean Martin", "base_cost_per_km": 0.72,
+         "co2_grams_per_km": 210, "avg_speed_kmh": 34.0},
         {"vehicle_id": "V-102", "type": "small_van", "fuel_type": "diesel",
          "capacity_kg": 500, "max_stops": 12, "shift_start": 8 * 60, "shift_end": 18 * 60,
-         "driver_name": "Suresh Kumar", "base_cost_per_km": 14.0,
-         "co2_grams_per_km": 250, "avg_speed_kmh": 26.0},
+         "driver_name": "Sabrina Laurent", "base_cost_per_km": 0.72,
+         "co2_grams_per_km": 210, "avg_speed_kmh": 34.0},
         {"vehicle_id": "V-103", "type": "small_van", "fuel_type": "diesel",
          "capacity_kg": 500, "max_stops": 12, "shift_start": 9 * 60, "shift_end": 19 * 60,
-         "driver_name": "Mohan Lal", "base_cost_per_km": 14.0,
-         "co2_grams_per_km": 250, "avg_speed_kmh": 26.0},
+         "driver_name": "Karim Benali", "base_cost_per_km": 0.72,
+         "co2_grams_per_km": 210, "avg_speed_kmh": 34.0},
         # 3 medium trucks (diesel)
         {"vehicle_id": "V-201", "type": "medium_truck", "fuel_type": "diesel",
          "capacity_kg": 1200, "max_stops": 18, "shift_start": 8 * 60, "shift_end": 18 * 60,
-         "driver_name": "Devendra Singh", "base_cost_per_km": 22.0,
-         "co2_grams_per_km": 320, "avg_speed_kmh": 24.0},
+         "driver_name": "Luc Moreau", "base_cost_per_km": 1.15,
+         "co2_grams_per_km": 520, "avg_speed_kmh": 32.0},
         {"vehicle_id": "V-202", "type": "medium_truck", "fuel_type": "diesel",
          "capacity_kg": 1200, "max_stops": 18, "shift_start": 8 * 60, "shift_end": 18 * 60,
-         "driver_name": "Bhupinder Negi", "base_cost_per_km": 22.0,
-         "co2_grams_per_km": 320, "avg_speed_kmh": 24.0},
+         "driver_name": "Éric Dubois", "base_cost_per_km": 1.15,
+         "co2_grams_per_km": 520, "avg_speed_kmh": 32.0},
         {"vehicle_id": "V-203", "type": "medium_truck", "fuel_type": "diesel",
          "capacity_kg": 1200, "max_stops": 18, "shift_start": 9 * 60, "shift_end": 19 * 60,
-         "driver_name": "Vinod Pandey", "base_cost_per_km": 22.0,
-         "co2_grams_per_km": 320, "avg_speed_kmh": 24.0},
+         "driver_name": "Nadia Robert", "base_cost_per_km": 1.15,
+         "co2_grams_per_km": 520, "avg_speed_kmh": 32.0},
         # 2 EVs
         {"vehicle_id": "V-301", "type": "ev", "fuel_type": "electric",
          "capacity_kg": 800, "max_stops": 14, "shift_start": 8 * 60, "shift_end": 18 * 60,
-         "driver_name": "Harish Chand", "base_cost_per_km": 9.0,
-         "co2_grams_per_km": 75, "avg_speed_kmh": 28.0},
+         "driver_name": "Hugo Petit", "base_cost_per_km": 0.32,
+         "co2_grams_per_km": 20, "avg_speed_kmh": 36.0},
         {"vehicle_id": "V-302", "type": "ev", "fuel_type": "electric",
          "capacity_kg": 800, "max_stops": 14, "shift_start": 9 * 60, "shift_end": 19 * 60,
-         "driver_name": "Ramesh Bisht", "base_cost_per_km": 9.0,
-         "co2_grams_per_km": 75, "avg_speed_kmh": 28.0},
+         "driver_name": "Mélanie Fournier", "base_cost_per_km": 0.32,
+         "co2_grams_per_km": 20, "avg_speed_kmh": 36.0},
     ]
 
 
@@ -113,7 +113,7 @@ def build_orders(n: int = 50, rng: random.Random | None = None) -> List[Dict[str
     rng = rng or random.Random(SEED)
     orders: List[Dict[str, Any]] = []
     for i in range(n):
-        area_name, alat, alon, pin = rng.choice(NCR_AREAS)
+        area_name, alat, alon, pin = rng.choice(FRANCE_AREAS)
         lat, lon = _rand_jitter(alat, alon, 1.5, rng)
         weight = round(rng.uniform(5, 200), 1)
         prio = rng.choices(
@@ -126,11 +126,11 @@ def build_orders(n: int = 50, rng: random.Random | None = None) -> List[Dict[str
         tw_end = tw_start + window_hours * 60
         sla = {"normal": 240, "urgent": 120, "express": 90}[prio]
         service = rng.choice([5, 8, 10, 12])
-        cust = f"{rng.choice(INDIAN_FIRST_NAMES)} {rng.choice(INDIAN_LAST_NAMES)}"
+        cust = f"{rng.choice(FRENCH_FIRST_NAMES)} {rng.choice(FRENCH_LAST_NAMES)}"
         orders.append({
             "order_id": f"ORD-{1000 + i}",
             "customer_name": cust,
-            "address": f"{rng.randint(1, 250)}, {area_name}, Delhi NCR {pin}",
+            "address": f"{rng.randint(1, 250)} Rue de la Logistique, {area_name} {pin}, France",
             "lat": round(lat, 6),
             "lon": round(lon, 6),
             "weight_kg": weight,
