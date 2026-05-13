@@ -22,7 +22,7 @@ class Vehicle(BaseModel):
     shift_start: int  # minutes from 00:00
     shift_end: int
     driver_name: str
-    base_cost_per_km: float  # INR
+    base_cost_per_km: float  # EUR; field name kept stable for API compatibility
     co2_grams_per_km: int
     avg_speed_kmh: float
 

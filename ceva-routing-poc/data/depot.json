@@ -1,7 +1,7 @@
 {
-  "depot_id": "DEP-DEL-01",
-  "name": "CEVA Delhi NCR Hub",
-  "address": "CEVA Logistics Hub, Mahipalpur, New Delhi 110037",
-  "lat": 28.6139,
-  "lon": 77.209
+  "depot_id": "DEP-FR-RSY-01",
+  "name": "CEVA Roissy-CDG France Hub",
+  "address": "14 Rue du Meunier, 95700 Roissy-en-France, France",
+  "lat": 49.0097,
+  "lon": 2.5479
 }

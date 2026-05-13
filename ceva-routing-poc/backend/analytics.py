@@ -204,6 +204,167 @@ def service_quality(routes: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+def _delta_summary(opt_value: float, base_value: float | None, unit: str, lower_is_better: bool = True) -> Dict[str, Any]:
+    """Return a small serializable comparison object for optimization explainability."""
+    if base_value is None:
+        return {
+            "optimized": round(opt_value, 2),
+            "baseline": None,
+            "delta": None,
+            "delta_pct": None,
+            "unit": unit,
+            "improved": None,
+        }
+    delta = opt_value - base_value
+    delta_pct = (delta / base_value * 100.0) if base_value else 0.0
+    improved = delta < 0 if lower_is_better else delta > 0
+    return {
+        "optimized": round(opt_value, 2),
+        "baseline": round(base_value, 2),
+        "delta": round(delta, 2),
+        "delta_pct": round(delta_pct, 1),
+        "unit": unit,
+        "improved": improved,
+    }
+
+
+def optimization_reasoning(
+    routes: List[Dict[str, Any]],
+    dropped: List[str],
+    total_orders: int,
+    kpis: Dict[str, Any],
+    baseline_routes: List[Dict[str, Any]] | None = None,
+    baseline_kpis: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Explain what changed and why the optimized plan was selected.
+
+    This is intentionally deterministic and derived only from OR-Tools outputs and
+    KPI deltas. Mistral may summarize the result in chat, but it does not create or
+    override the optimization rationale.
+    """
+    comparisons = {
+        "distance": _delta_summary(
+            kpis["total_distance_km"],
+            baseline_kpis.get("total_distance_km") if baseline_kpis else None,
+            "km",
+            lower_is_better=True,
+        ),
+        "cost": _delta_summary(
+            kpis["total_cost_inr"],
+            baseline_kpis.get("total_cost_inr") if baseline_kpis else None,
+            "EUR",
+            lower_is_better=True,
+        ),
+        "co2": _delta_summary(
+            kpis["total_co2_kg"],
+            baseline_kpis.get("total_co2_kg") if baseline_kpis else None,
+            "kg CO2e",
+            lower_is_better=True,
+        ),
+        "on_time": _delta_summary(
+            kpis["on_time_delivery_pct"],
+            baseline_kpis.get("on_time_delivery_pct") if baseline_kpis else None,
+            "pct",
+            lower_is_better=False,
+        ),
+        "drops": _delta_summary(
+            kpis["orders_dropped"],
+            baseline_kpis.get("orders_dropped") if baseline_kpis else None,
+            "orders",
+            lower_is_better=True,
+        ),
+    }
+
+    improved = [name for name, item in comparisons.items() if item["improved"] is True]
+    protected = [name for name, item in comparisons.items() if item["baseline"] is not None and item["delta"] == 0]
+
+    why: List[str] = [
+        "OR-Tools evaluated feasible stop sequences against capacity, max-stop, driver-shift and customer time-window constraints.",
+        "The objective combines travel distance/cost with a carbon shadow price, while priority-aware drop penalties protect express and urgent orders.",
+    ]
+    if improved:
+        labels = {
+            "distance": "distance",
+            "cost": "operating cost",
+            "co2": "CO2 emissions",
+            "on_time": "on-time performance",
+            "drops": "drop count",
+        }
+        why.append("The selected plan improves " + ", ".join(labels[i] for i in improved) + " versus the baseline.")
+    if protected:
+        why.append("The plan preserves " + ", ".join(protected) + " while optimizing other objectives.")
+    if dropped:
+        why.append(f"{len(dropped)} orders remain dropped because serving them would violate active constraints or incur a lower-priority trade-off.")
+
+    top_routes = sorted(
+        [r for r in routes if r["stops"]],
+        key=lambda r: (len(r["stops"]), r["load_utilization"], r["green_score"]),
+        reverse=True,
+    )[:5]
+    route_reasoning = []
+    for r in top_routes:
+        priorities: Dict[str, int] = {}
+        for stop in r["stops"]:
+            priorities[stop["priority"]] = priorities.get(stop["priority"], 0) + 1
+        priority_text = ", ".join(f"{count} {priority}" for priority, count in sorted(priorities.items()))
+        reasons = [
+            f"Assigned {len(r['stops'])} stops within {round(r['load_utilization'] * 100, 1)}% load and {round(r['time_utilization'] * 100, 1)}% shift utilization.",
+            f"Sequenced stops to respect time windows; {sum(1 for s in r['stops'] if s['on_time'])}/{len(r['stops'])} stops are on time.",
+        ]
+        if r["fuel_type"] == "electric":
+            reasons.append("EV route receives a high green score because France-grid emissions are lower than diesel alternatives.")
+        if priority_text:
+            reasons.append(f"Priority mix handled on this route: {priority_text}.")
+        route_reasoning.append({
+            "vehicle_id": r["vehicle_id"],
+            "driver_name": r["driver_name"],
+            "stops": len(r["stops"]),
+            "distance_km": r["total_distance_km"],
+            "cost_eur": r["cost_inr"],
+            "co2_kg": r["co2_kg"],
+            "green_score": r["green_score"],
+            "reasons": reasons,
+        })
+
+    summary = "Optimized plan generated with OR-Tools constraint solving."
+    if baseline_kpis:
+        dist = comparisons["distance"]
+        cost = comparisons["cost"]
+        co2 = comparisons["co2"]
+
+        def direction(item: Dict[str, Any], lower_label: str = "reduced", higher_label: str = "increased") -> str:
+            delta = item["delta"] or 0
+            if delta < 0:
+                return lower_label
+            if delta > 0:
+                return higher_label
+            return "held flat"
+
+        summary = (
+            f"Optimized plan serves {kpis['stops_served']}/{kpis['orders_total']} orders and "
+            f"{direction(dist)} distance by {abs(dist['delta'] or 0):.1f} km, "
+            f"{direction(cost)} cost by €{abs(cost['delta'] or 0):.0f}, and "
+            f"{direction(co2)} CO2e by {abs(co2['delta'] or 0):.1f} kg versus baseline."
+        )
+
+    return {
+        "summary": summary,
+        "optimizer": "Google OR-Tools VRP solver",
+        "selected_objective": "Minimize distance/cost/carbon while satisfying capacity, shift, max-stop, time-window and priority drop-penalty constraints.",
+        "baseline_reference": "Naive priority-sorted round-robin assignment with nearest-neighbor sequencing" if baseline_routes is not None else None,
+        "comparisons": comparisons,
+        "why_optimized": why,
+        "route_reasoning": route_reasoning,
+        "dropped_order_ids": dropped,
+        "generated_from": [
+            "analytics.kpis",
+            "optimizer.routes",
+            "baseline.kpis" if baseline_kpis else "baseline unavailable",
+            "OR-Tools constraints",
+        ],
+    }
+
+
 def full_analytics(
     routes: List[Dict[str, Any]],
     dropped: List[str],
@@ -218,4 +379,7 @@ def full_analytics(
         "carbon": carbon_breakdown(routes, baseline_routes),
         "financial": financial_impact(kpis, baseline_kpis),
         "service": service_quality(routes),
+        "optimization_reasoning": optimization_reasoning(
+            routes, dropped, total_orders, kpis, baseline_routes=baseline_routes, baseline_kpis=baseline_kpis
+        ),
     }

@@ -1,13 +1,13 @@
 # CEVA Dynamic Routing & Logistics Intelligence POC
 
-A web-based dynamic routing & logistics-intelligence platform for last-mile delivery, branded for CEVA Logistics. The POC demonstrates four differentiated capabilities on a synthetic Delhi NCR dataset:
+A web-based dynamic routing & logistics-intelligence platform for last-mile delivery, branded for CEVA Logistics France. The POC demonstrates four differentiated capabilities on a synthetic France / Île-de-France dataset anchored at the Roissy-CDG hub:
 
-1. **Dynamic Route Optimization** — Google OR-Tools VRP with capacity, time-windows, max-stops, soft-drop penalties and a **carbon-aware multi-objective cost** (`distance × per-km cost + CO₂e × ₹2,000/tonne`).
+1. **Dynamic Route Optimization** — Google OR-Tools VRP with capacity, time-windows, max-stops, soft-drop penalties and a **carbon-aware multi-objective cost** (`distance × per-km cost + CO₂e × €90/tonne`).
 2. **Fleet & Asset Utilization Analytics** — load %, time %, stop %, idle vehicles, drop rate, cost per delivery / km / kg.
 3. **Carbon Footprint Tracking & Sustainability Scoring** — total CO₂e, per-delivery, per-km, per-kg; baseline vs optimized savings; equivalencies (trees, car-km); EV vs diesel split; Green Score per route (0–100).
-4. **AI Logistics Co-Pilot** — Mistral AI (`mistral-large-latest`) with **streaming** responses and the current routes/utilization/carbon/financial state injected as context. Falls back to a deterministic data-grounded answer if no API key is set, so the demo always works.
+4. **AI Logistics Co-Pilot** — Mistral AI (`mistral-large-latest` by default, configurable) with **streaming** responses, RAG Pipeline Engineering context, and the current routes/utilization/carbon/financial state injected as context. Falls back to a deterministic data-grounded answer if no API key is set, so the demo always works.
 
-All wrapped in a **CEVA-branded analytics dashboard** (red `#98012E`, navy `#0B2C5C`, Inter font, clean industrial styling).
+All wrapped in a **CEVA-branded analytics dashboard** (red `#98012E`, navy `#0B2C5C`, Inter font, clean industrial styling) aligned to a France control-tower use case.
 
 ---
 
@@ -93,8 +93,20 @@ The first run generates `data/depot.json`, `data/vehicles.json`, `data/synthetic
 | GET    | `/api/analytics`    | consolidated KPI + utilization + carbon + financial + service |
 | GET    | `/api/carbon`       | carbon-only deep-dive payload                     |
 | GET    | `/api/utilization`  | per-vehicle utilization breakdown                 |
+| GET    | `/api/architecture` | Phase 1 findings, target architecture, AI governance |
 | POST   | `/api/chat`         | Mistral streaming SSE with state context injected |
 | POST   | `/api/reset`        | restore the original orders + vehicles            |
+
+---
+
+## Architecture and AI governance updates
+
+The current implementation remains incremental and preserves the existing `/api/*` contracts. The new `/api/architecture` endpoint and dashboard tab expose:
+
+- **Phase 1 assessment** — optimization latency, in-memory state, matrix rebuild cost, AI responsibility boundaries, and security configuration gaps.
+- **Phase 2 target architecture** — React control tower, FastAPI orchestration, OR-Tools optimization service, OSRM/Google routing adapter, Mistral intelligence service, and PostgreSQL operational store.
+- **Selected item from the reference image** — **RAG Pipeline Engineering**. Mistral receives retrieval-style operational context (current KPIs, routes, SLA risk, carbon metrics, and France playbook) to reason over; it does not replace OR-Tools.
+- **Responsibility boundary** — OR-Tools handles VRP solving, scheduling, time windows, and capacity constraints. Mistral handles operational reasoning, dispatch recommendations, exception handling, natural-language interpretation, and workflow orchestration only.
 
 ---
 
@@ -104,11 +116,11 @@ Defined in `backend/carbon.py`:
 
 | Vehicle      | g CO₂e/km       |
 | ------------ | --------------- |
-| small_van    | 250 (diesel LCV) |
-| medium_truck | 320 (diesel MCV) |
-| ev           | 75 (India grid 2025) |
+| small_van    | 210 (diesel LCV, France urban duty cycle) |
+| medium_truck | 520 (diesel MCV / rigid truck) |
+| ev           | 20 (France low-carbon grid planning factor) |
 
-Equivalencies use 21 kg CO₂/yr per mature tree and 170 g/km for an average passenger car. The optimizer prices carbon at **₹2,000/tonne** so route choices reflect both rupee and emission costs.
+Equivalencies use 21 kg CO₂/yr per mature tree and 120 g/km for an average passenger car planning factor. The optimizer prices carbon at **€90/tonne** so route choices reflect both euro and emission costs.
 
 ---
 
@@ -118,10 +130,12 @@ Equivalencies use 21 kg CO₂/yr per mature tree and 170 g/km for an average pas
 ceva-routing-poc/
 ├── backend/
 │   ├── main.py              FastAPI app + endpoints
+│   ├── architecture.py      Phase 1 findings + target architecture metadata
+│   ├── config.py            environment-driven runtime settings
 │   ├── optimizer.py         OR-Tools VRP + naive baseline
 │   ├── analytics.py         KPI / utilization / carbon / financial / service
 │   ├── carbon.py            emission factors & equivalencies
-│   ├── data_generator.py    synthetic Delhi NCR dataset
+│   ├── data_generator.py    synthetic France / Île-de-France dataset
 │   ├── llm.py               Mistral streaming + deterministic fallback
 │   ├── distance.py          OSRM table + Haversine fallback
 │   ├── models.py            Pydantic models
@@ -141,6 +155,7 @@ ceva-routing-poc/
 │   │       ├── CarbonTab.tsx
 │   │       ├── FinancialTab.tsx
 │   │       ├── ServiceTab.tsx
+│   │       ├── ArchitectureTab.tsx
 │   │       ├── CoPilotChat.tsx
 │   │       └── RouteDrawer.tsx
 │   ├── tailwind.config.js
@@ -180,11 +195,11 @@ ceva-routing-poc/
 
 - OR-Tools time limit is **8 s**; production deployments should tune this and warm-start from previous solutions.
 - OSRM public demo is rate-limited; for production use a self-hosted OSRM or commercial routing API. The Haversine fallback is automatic but less accurate.
-- Carbon emission factors are well-to-wheel approximations (India grid 2025) — should be calibrated against CEVA's measured fleet data.
-- ROI extrapolation assumes uniform performance across 10 NCR-class depots and 312 working days — meant as an order-of-magnitude figure for executives, not a forecast.
-- The deterministic fallback in `llm.py` is intentionally simple; with `MISTRAL_API_KEY` set, full reasoning quality is delegated to `mistral-large-latest`.
+- Carbon emission factors are well-to-wheel approximations (France grid planning factor) — should be calibrated against CEVA's measured fleet data.
+- ROI extrapolation assumes uniform performance across 10 France regional depots and 312 working days — meant as an order-of-magnitude figure for executives, not a forecast.
+- The deterministic fallback in `llm.py` is intentionally simple; with `MISTRAL_API_KEY` set, full reasoning quality is delegated to `mistral-large-latest` by default.
 - All data is synthetic and seeded with `42`; no real customer / driver / address data is used.
 
 ---
 
-CEVA Logistics POC | Confidential | © 2026
+CEVA Logistics France Control Tower POC | Confidential | © 2026

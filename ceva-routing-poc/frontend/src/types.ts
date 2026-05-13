@@ -166,12 +166,45 @@ export interface ServiceMetrics {
   violations_count: number;
 }
 
+export interface OptimizationComparison {
+  optimized: number;
+  baseline: number | null;
+  delta: number | null;
+  delta_pct: number | null;
+  unit: string;
+  improved: boolean | null;
+}
+
+export interface RouteReasoning {
+  vehicle_id: string;
+  driver_name: string;
+  stops: number;
+  distance_km: number;
+  cost_eur: number;
+  co2_kg: number;
+  green_score: number;
+  reasons: string[];
+}
+
+export interface OptimizationReasoning {
+  summary: string;
+  optimizer: string;
+  selected_objective: string;
+  baseline_reference: string | null;
+  comparisons: Record<string, OptimizationComparison>;
+  why_optimized: string[];
+  route_reasoning: RouteReasoning[];
+  dropped_order_ids: string[];
+  generated_from: string[];
+}
+
 export interface Analytics {
   kpis: Kpis;
   utilization: Utilization;
   carbon: Carbon;
   financial: Financial;
   service: ServiceMetrics;
+  optimization_reasoning: OptimizationReasoning;
 }
 
 export interface ScenarioResult {

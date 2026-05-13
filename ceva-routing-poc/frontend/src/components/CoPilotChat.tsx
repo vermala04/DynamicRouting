@@ -18,7 +18,7 @@ const SUGGESTED = [
   "Summarize today's optimization wins",
   "Which vehicles are underutilized?",
   "How much CO₂ did we save and what's the equivalent?",
-  "What if I add 10 more orders to Noida?",
+  "What if I add 10 more orders to Paris/Rungis?",
   "Which routes can I shift to EV to maximize green score?",
 ];
 
@@ -33,7 +33,7 @@ const CoPilotChat: React.FC<Props> = ({ open, onClose, scenario }) => {
     {
       role: "assistant",
       content:
-        "Hello — I'm the CEVA Logistics Co-Pilot, powered by Mistral AI. I can analyze today's routes, utilization, carbon, and savings. Try a suggested question below.",
+        "Hello — I'm the CEVA France Logistics Co-Pilot, powered by Mistral AI using RAG Pipeline Engineering. I can analyze routes, utilization, SLA risk, carbon, and savings while OR-Tools remains the optimizer of record. Try a suggested question below.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -97,7 +97,7 @@ const CoPilotChat: React.FC<Props> = ({ open, onClose, scenario }) => {
         <div className="w-8 h-8 rounded-md bg-ceva-red flex items-center justify-center text-white font-extrabold text-sm">AI</div>
         <div className="flex-1">
           <div className="text-sm font-bold text-ceva-black">CEVA Co-Pilot</div>
-          <div className="text-[11px] text-ceva-grayText">Powered by Mistral AI · scenario: <b>{scenario}</b></div>
+          <div className="text-[11px] text-ceva-grayText">Mistral AI · RAG Pipeline · scenario: <b>{scenario}</b></div>
         </div>
         <button onClick={onClose} className="ceva-btn-ghost text-xs px-2 py-1">Close</button>
       </div>
