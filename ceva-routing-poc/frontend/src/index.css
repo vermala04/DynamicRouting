@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { font-family: "Inter", system-ui, sans-serif; }
+
+/* Leaflet z-index fix so panels stack above map */
+.leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 0 !important; }
+
+/* CEVA card base */
+@layer components {
+  .ceva-card {
+    @apply bg-white rounded-md shadow-card border border-ceva-grayMid;
+  }
+  .ceva-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-ceva-red text-white font-semibold hover:bg-ceva-redDark transition-colors disabled:opacity-50;
+  }
+  .ceva-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-ceva-navy text-white font-semibold hover:bg-ceva-navyDark transition-colors;
+  }
+  .ceva-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md border border-ceva-grayMid text-ceva-black hover:bg-ceva-gray transition-colors;
+  }
+  .ceva-pill {
+    @apply inline-flex items-center gap-1 text-xs font-semibold rounded-md px-2 py-1;
+  }
+  .ceva-tab {
+    @apply px-4 py-2 text-sm font-semibold border-b-2 border-transparent text-ceva-grayText hover:text-ceva-black transition-colors;
+  }
+  .ceva-tab-active {
+    @apply text-ceva-red border-ceva-red;
+  }
+}
+
+/* Markdown-ish chat content */
+.chat-md p { margin-bottom: 0.5rem; }
+.chat-md ul { list-style: disc; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+.chat-md ol { list-style: decimal; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+.chat-md strong { font-weight: 700; color: #231F20; }
+.chat-md code { background: #F5F5F7; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.85em; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #d6d6dc; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #b8b8c0; }
